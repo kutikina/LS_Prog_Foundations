@@ -20,8 +20,8 @@ CHOICES = {
   'sp' => 'spock'
 }.freeze
 
-def short_to_long(ch)
-  CHOICES[ch]
+def short_to_long(choice)
+  CHOICES[choice]
 end
 
 def win?(first, second)
@@ -63,8 +63,8 @@ while player_score < 5 && computer_score < 5
   loop do
     prompt(choice_prompt)
     choice = gets.chomp
-    prompt('You must make a valid choice') unless %w(s p r sp l).include?(choice)
-    break
+    break if %w(s p r sp l).include?(choice)
+    prompt('You must make a valid choice')
   end
 
   computer_choice = VALID_CHOICES.sample
@@ -82,10 +82,7 @@ while player_score < 5 && computer_score < 5
 
 end
 
-if computer_score == 5
-  puts "Game over, the computer won!!"
-else
-  puts "Game over, you won!!"
-end
+  puts "Game over, the computer won!!" if computer_score == 5
+  puts "Game over, you won!!" if computer_score == 5
 
 prompt("Thanks for playing.")
