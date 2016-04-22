@@ -38,14 +38,14 @@ loop do
     prompt "What is the loan duration in years?"
     duration = gets.chomp.to_i
     if duration > 0
-      duration = duration * 12
+      duration *= 12
       break
-    else  
+    else
       prompt "You must enter a valid duration greater than 0 years"
     end
   end
 
-  payment = amount * (monthly_rate * ((monthly_rate + 1) ** duration) / (((monthly_rate + 1) ** duration) - 1))
+  payment = amount * (monthly_rate * ((monthly_rate + 1)**duration) / (((monthly_rate + 1)**duration) - 1))
 
   puts "Your loan deails are:"
   puts "Loan amount: $ #{amount}."
