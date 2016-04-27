@@ -72,4 +72,3 @@ puts sentence.delete(".").split.reverse.join(" ") + "."
 
 
 
-
