@@ -12,9 +12,10 @@ def prompt(mesg)
 end
 
 # rubocop:disable Metrics/AbcSize
-def display_board(brd)
+def display_board(brd, pl_score, comp_score)
   system 'clear'
   puts "You are a #{PLAYER_MARKER} and the computer is a #{COMPUTER_MARKER}."
+  puts "The scores are Player: #{pl_score}, Computer: #{comp_score}."
   puts ""
   puts "     |     |"
   puts "  #{brd[1]}  |  #{brd[2]}  |  #{brd[3]}"
@@ -40,10 +41,14 @@ def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
 
+def joinor(arr, seperator = ', ', final = 'or')
+  arr.size > 1 ? arr[0..-2].join(seperator) + seperator + final + ' ' + arr.last.to_s : arr.last
+end
+
 def player_places_piece!(brd)
   square = ''
   loop do
-    prompt "Please choose a square (#{empty_squares(brd).join(', ')}):"
+    prompt "Please choose a square (#{joinor(empty_squares(brd), ', ', 'or')}):"
     square = gets.chomp.to_i
     break if empty_squares(brd).include?(square)
     prompt 'That\'s not a valid choice.'
@@ -52,8 +57,18 @@ def player_places_piece!(brd)
 end
 
 def computer_places_piece(brd)
-  square = empty_squares(brd).sample
+  if detect_threat(brd)
+    square = block_threat(brd)
+  else
+    square = empty_squares(brd).sample
+  end
+  #binding.pry
   brd[square] = COMPUTER_MARKER
+  #binding.pry
+end
+
+def block_threat(brd)
+     detect_threat(brd).select { |value| brd[value] == INITIAL_MARKER}.join.to_i
 end
 
 def board_full?(brd)
@@ -62,6 +77,15 @@ end
 
 def someone_won?(brd)
   !!detect_winner(brd)
+end
+
+def detect_threat(brd)
+  WINNING_LINES.each do |line|
+    if brd.values_at(*line).count(PLAYER_MARKER) == 2 && brd.values_at(*line).count(COMPUTER_MARKER) < 1
+      return line
+    end
+  end
+  nil
 end
 
 def detect_winner(brd)
@@ -76,22 +100,34 @@ def detect_winner(brd)
 end
 
 loop do
-  board = initialize_board
-
+  player_score = 0
+  computer_score = 0
   loop do
-    display_board(board)
-    player_places_piece!(board)
-    computer_places_piece(board)
-    break if someone_won?(board) || board_full?(board)
+    board = initialize_board
+    #puts "The scores are Player: #{player_score}, Computer: #{computer_score}."
+
+    loop do
+      display_board(board, player_score, computer_score)
+      player_places_piece!(board)
+      computer_places_piece(board)
+      break if someone_won?(board) || board_full?(board)
+    end
+
+    display_board(board, player_score, computer_score)
+
+    if someone_won?(board)
+      #binding.pry
+      prompt "#{detect_winner(board)} won!"
+      detect_winner(board) == "Player" ? player_score += 1 : computer_score += 1
+    else
+      prompt "It's a tie"
+    end
+
+    #puts "The scores are Player: #{player_score}, Computer: #{computer_score}."
+    break unless player_score < 5 && computer_score < 5
   end
 
-  display_board(board)
-
-  if someone_won?(board)
-    prompt "#{detect_winner(board)} won!"
-  else
-    prompt "It's a tie"
-  end
+  puts (player_score == 5 ? "Player wins the game!" : "Computer wins the game!")
 
   prompt "Play again? (y or n)"
   answer = gets.chomp
